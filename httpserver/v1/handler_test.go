@@ -13,7 +13,7 @@ import (
 
 func TestSayHello(t *testing.T) {
 	type fields struct {
-		encoder encoder
+		encoder *encoderMock
 		greeter *greeterMock
 	}
 

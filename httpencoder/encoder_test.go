@@ -88,7 +88,7 @@ func TestError(t *testing.T) {
 		{
 			name:         "resource not found",
 			err:          fmt.Errorf("resource not found: %w", domain.ErrNotFound),
-			expectedCode: http.StatusBadRequest,
+			expectedCode: http.StatusNotFound,
 		},
 		{
 			name:         "bad request data",
