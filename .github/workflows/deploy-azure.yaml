@@ -1,32 +1,58 @@
-name: Build and deploy Azure
+# name: Build and deploy Azure
 
-on:
-  push:
-    branches: [main]
+# on:
+#   push:
+#     branches: [main]
+# jobs:
+#   build_push_image:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v5
+
+#       - name: Build docker image
+#         run: make docker/build
+
+#       - name: Tag docker image
+#         run: make docker/tag TAG_NAME=stable
+
+#       # - name: Login to with azure-cli for deploying container apps.
+#       #   uses: azure/login@v1
+#       #   with:
+#       #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+#       - name: Login to Azure container registry
+#         uses: azure/docker-login@v1
+#         with:
+#           login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+#           username: ${{ secrets.REGISTRY_USERNAME }}
+#           password: ${{ secrets.REGISTRY_PASSWORD }}
+
+#       - name: Push the Docker image
+#         run: make docker/push
+
+on: [push]
+name: Build and deploy test
+
 jobs:
-  build_push_image:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      # checkout the repo
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@main
 
-      - name: Build docker image
-        run: make docker/build
+      - name: "Login via Azure CLI"
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Tag docker image
-        run: make docker/tag TAG_NAME=stable
-
-      # - name: Login to with azure-cli for deploying container apps.
-      #   uses: azure/login@v1
-      #   with:
-      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Login to Azure container registry
+      - name: "Build and push image"
         uses: azure/docker-login@v1
         with:
           login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
-
-      - name: Push the Docker image
-        run: make docker/push
+      - run: |
+          docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/hello-world:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/hello-world:${{ github.sha }}
