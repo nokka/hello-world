@@ -1,0 +1,25 @@
+name: Build and deploy Azure
+
+on:
+  push:
+    branches: [main]
+jobs:
+  build_push_image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout
+
+      - name: Build docker image
+        run: make docker/build
+
+      - name: Tag docker image
+        run: make docker/tag TAG_NAME=stable
+
+      - name: Login to Azure Container registry
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Push the Docker image
+        run: make docker/push
